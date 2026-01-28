@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Flappy Bird Clone</title>
+    <title>Game Hub</title>
     <style>
         body {
             margin: 0;
@@ -12,289 +12,368 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background-color: #222;
-            font-family: 'Arial', sans-serif;
+            background-color: #1a1a1a;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             overflow: hidden;
             touch-action: none;
+            color: white;
         }
 
-        #game-container {
+        #main-container {
             position: relative;
             width: 100%;
             max-width: 400px;
             height: 600px;
-            background-color: #70c5ce;
-            border: 4px solid #fff;
-            border-radius: 8px;
+            background-color: #333;
+            border: 4px solid #444;
+            border-radius: 12px;
             overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
         }
 
-        canvas {
-            display: block;
-        }
-
-        #ui-layer {
+        .screen {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            display: flex;
+            display: none;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            pointer-events: none;
         }
 
-        #score-display {
-            position: absolute;
-            top: 20px;
-            font-size: 48px;
+        .screen.active {
+            display: flex;
+        }
+
+        /* Menu Styles */
+        #menu-screen {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            gap: 15px;
+        }
+
+        h1 { margin-bottom: 30px; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
+
+        .menu-btn {
+            width: 80%;
+            padding: 15px;
+            font-size: 18px;
             font-weight: bold;
-            color: white;
-            text-shadow: 2px 2px 0 #000;
-            z-index: 10;
-        }
-
-        #message-box {
-            background: rgba(255, 255, 255, 0.9);
-            padding: 20px;
-            border-radius: 15px;
-            text-align: center;
-            display: none;
-            pointer-events: auto;
-            border: 4px solid #333;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-        }
-
-        .death-msg {
-            font-size: 32px;
-            font-weight: bold;
-            color: #d32f2f;
-            margin-bottom: 15px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.2s;
             text-transform: uppercase;
         }
 
-        button {
-            padding: 10px 25px;
-            font-size: 18px;
-            background-color: #4caf50;
-            color: white;
+        .menu-btn:hover { transform: scale(1.05); }
+        .btn-flappy { background: #fdd835; color: #000; }
+        .btn-blackjack { background: #2e7d32; color: #fff; }
+        .btn-crossy { background: #8bc34a; color: #000; }
+        .btn-suck { background: #d32f2f; color: #fff; }
+
+        .back-btn {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            padding: 5px 10px;
+            background: rgba(255,255,255,0.2);
             border: none;
-            border-radius: 5px;
+            color: white;
+            border-radius: 4px;
             cursor: pointer;
-            font-weight: bold;
-            transition: transform 0.1s;
+            z-index: 100;
         }
 
-        button:active {
-            transform: scale(0.95);
+        /* Game Specific Styles */
+        #flappy-screen { background-color: #70c5ce; }
+        #blackjack-screen { background-color: #1b5e20; }
+        #crossy-screen { background-color: #444; }
+        #suck-screen { background-color: #000; }
+
+        canvas { display: block; }
+        
+        .score-ui {
+            position: absolute;
+            top: 20px;
+            font-size: 32px;
+            font-weight: bold;
+            text-shadow: 2px 2px 0 #000;
+            pointer-events: none;
+        }
+
+        #blackjack-ui {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .card-area {
+            display: flex;
+            gap: 10px;
+            margin: 10px 0;
+            min-height: 80px;
+        }
+
+        .card {
+            background: white;
+            color: black;
+            padding: 10px;
+            border-radius: 5px;
+            width: 40px;
+            text-align: center;
+            font-weight: bold;
+            border: 1px solid #ccc;
+        }
+
+        #suck-msg {
+            font-size: 40px;
+            font-weight: bold;
+            color: red;
+            text-align: center;
         }
     </style>
 </head>
 <body>
 
-    <div id="game-container">
-        <canvas id="gameCanvas"></canvas>
-        <div id="ui-layer">
-            <div id="score-display">0</div>
-            <div id="message-box">
-                <div id="status-text" class="death-msg">U SUCK NIGGA</div>
-                <button onclick="resetGame()">PLAY AGAIN</button>
+    <div id="main-container">
+        <!-- Main Menu -->
+        <div id="menu-screen" class="screen active">
+            <h1>GAME HUB</h1>
+            <button class="menu-btn btn-flappy" onclick="showScreen('flappy')">Flappy Bird</button>
+            <button class="menu-btn btn-blackjack" onclick="showScreen('blackjack')">Blackjack</button>
+            <button class="menu-btn btn-crossy" onclick="showScreen('crossy')">Crossy Roads</button>
+            <button class="menu-btn btn-suck" onclick="showScreen('suck')">The Truth</button>
+        </div>
+
+        <!-- Flappy Bird -->
+        <div id="flappy-screen" class="screen">
+            <button class="back-btn" onclick="showScreen('menu')">MENU</button>
+            <div id="flappy-score" class="score-ui">0</div>
+            <canvas id="flappyCanvas"></canvas>
+        </div>
+
+        <!-- Blackjack -->
+        <div id="blackjack-screen" class="screen">
+            <button class="back-btn" onclick="showScreen('menu')">MENU</button>
+            <div id="blackjack-ui">
+                <div id="bj-msg" style="font-size: 24px; margin-bottom: 10px;">Play Blackjack</div>
+                <div>Dealer: <span id="dealer-score">?</span></div>
+                <div id="dealer-cards" class="card-area"></div>
+                <hr>
+                <div>Player: <span id="player-score">0</span></div>
+                <div id="player-cards" class="card-area"></div>
+                <div id="bj-controls" style="margin-top: 20px;">
+                    <button class="menu-btn btn-blackjack" style="width: 100px;" onclick="bjHit()">Hit</button>
+                    <button class="menu-btn btn-suck" style="width: 100px;" onclick="bjStand()">Stand</button>
+                    <button id="bj-reset" class="menu-btn btn-flappy" style="width: 100px; display: none;" onclick="initBlackjack()">New Game</button>
+                </div>
             </div>
+        </div>
+
+        <!-- Crossy Road -->
+        <div id="crossy-screen" class="screen">
+            <button class="back-btn" onclick="showScreen('menu')">MENU</button>
+            <div id="crossy-score" class="score-ui">0</div>
+            <canvas id="crossyCanvas"></canvas>
+        </div>
+
+        <!-- Suck Screen -->
+        <div id="suck-screen" class="screen">
+            <button class="back-btn" onclick="showScreen('menu')">MENU</button>
+            <div id="suck-msg">U SUCK DUMBASS</div>
         </div>
     </div>
 
     <script>
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        const scoreDisplay = document.getElementById('score-display');
-        const messageBox = document.getElementById('message-box');
+        let currentLoop = null;
 
-        // Set dimensions
-        canvas.width = 400;
-        canvas.height = 600;
-
-        // Game constants
-        const GRAVITY = 0.25;
-        const JUMP = -4.5;
-        const PIPE_SPEED = 2;
-        const PIPE_SPAWN_RATE = 100; // frames
-        const PIPE_GAP = 160;
-
-        let bird = {
-            x: 50,
-            y: 300,
-            velocity: 0,
-            radius: 15
-        };
-
-        let pipes = [];
-        let score = 0;
-        let frameCount = 0;
-        let isGameOver = false;
-        let animationId;
-
-        function createPipe() {
-            const minHeight = 50;
-            const maxHeight = canvas.height - PIPE_GAP - minHeight;
-            const height = Math.floor(Math.random() * (maxHeight - minHeight + 1)) + minHeight;
+        function showScreen(screenId) {
+            if (currentLoop) cancelAnimationFrame(currentLoop);
             
-            pipes.push({
-                x: canvas.width,
-                top: height,
-                bottom: canvas.height - height - PIPE_GAP,
-                passed: false
-            });
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId + '-screen').classList.add('active');
+
+            if (screenId === 'flappy') initFlappy();
+            if (screenId === 'blackjack') initBlackjack();
+            if (screenId === 'crossy') initCrossy();
         }
 
-        function drawBird() {
-            ctx.fillStyle = '#fdd835';
-            ctx.beginPath();
-            ctx.arc(bird.x, bird.y, bird.radius, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.strokeStyle = '#000';
-            ctx.lineWidth = 2;
-            ctx.stroke();
+        // --- FLAPPY BIRD LOGIC ---
+        function initFlappy() {
+            const canvas = document.getElementById('flappyCanvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 400; canvas.height = 600;
 
-            // Eye
-            ctx.fillStyle = 'white';
-            ctx.beginPath();
-            ctx.arc(bird.x + 8, bird.y - 5, 5, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.fillStyle = 'black';
-            ctx.beginPath();
-            ctx.arc(bird.x + 10, bird.y - 5, 2, 0, Math.PI * 2);
-            ctx.fill();
+            let bird = { x: 50, y: 300, v: 0, r: 15 };
+            let pipes = [];
+            let score = 0;
+            let frames = 0;
+            let dead = false;
 
-            // Beak
-            ctx.fillStyle = '#ff9800';
-            ctx.beginPath();
-            ctx.moveTo(bird.x + 12, bird.y);
-            ctx.lineTo(bird.x + 22, bird.y + 5);
-            ctx.lineTo(bird.x + 12, bird.y + 10);
-            ctx.fill();
-        }
+            function loop() {
+                if (!dead) {
+                    ctx.clearRect(0, 0, 400, 600);
+                    bird.v += 0.25; bird.y += bird.v;
+                    if (bird.y > 600 || bird.y < 0) dead = true;
 
-        function drawPipes() {
-            ctx.fillStyle = '#43a047';
-            ctx.strokeStyle = '#1b5e20';
-            ctx.lineWidth = 3;
+                    if (frames % 100 === 0) {
+                        let h = Math.random() * 300 + 50;
+                        pipes.push({ x: 400, top: h, passed: false });
+                    }
 
-            pipes.forEach(pipe => {
-                // Top pipe
-                ctx.fillRect(pipe.x, 0, 50, pipe.top);
-                ctx.strokeRect(pipe.x, 0, 50, pipe.top);
+                    pipes.forEach((p, i) => {
+                        p.x -= 2;
+                        ctx.fillStyle = '#43a047';
+                        ctx.fillRect(p.x, 0, 50, p.top);
+                        ctx.fillRect(p.x, p.top + 160, 50, 600);
 
-                // Bottom pipe
-                ctx.fillRect(pipe.x, canvas.height - pipe.bottom, 50, pipe.bottom);
-                ctx.strokeRect(pipe.x, canvas.height - pipe.bottom, 50, pipe.bottom);
-            });
-        }
+                        if (bird.x + 15 > p.x && bird.x - 15 < p.x + 50 && (bird.y - 15 < p.top || bird.y + 15 > p.top + 160)) dead = true;
+                        if (!p.passed && bird.x > p.x + 50) { score++; p.passed = true; document.getElementById('flappy-score').innerText = score; }
+                        if (p.x < -50) pipes.splice(i, 1);
+                    });
 
-        function update() {
-            if (isGameOver) return;
-
-            bird.velocity += GRAVITY;
-            bird.y += bird.velocity;
-
-            // Ground/Ceiling collision
-            if (bird.y + bird.radius > canvas.height || bird.y - bird.radius < 0) {
-                gameOver();
-            }
-
-            // Pipe management
-            if (frameCount % PIPE_SPAWN_RATE === 0) {
-                createPipe();
-            }
-
-            pipes.forEach((pipe, index) => {
-                pipe.x -= PIPE_SPEED;
-
-                // Collision detection
-                if (
-                    bird.x + bird.radius > pipe.x && 
-                    bird.x - bird.radius < pipe.x + 50 &&
-                    (bird.y - bird.radius < pipe.top || bird.y + bird.radius > canvas.height - pipe.bottom)
-                ) {
-                    gameOver();
+                    ctx.fillStyle = 'yellow';
+                    ctx.beginPath(); ctx.arc(bird.x, bird.y, 15, 0, Math.PI*2); ctx.fill();
+                    frames++;
+                    currentLoop = requestAnimationFrame(loop);
+                } else {
+                    document.getElementById('suck-msg').innerText = "U SUCK NIGGA";
+                    showScreen('suck');
                 }
+            }
 
-                // Score update
-                if (!pipe.passed && bird.x > pipe.x + 50) {
-                    score++;
-                    scoreDisplay.innerText = score;
-                    pipe.passed = true;
-                }
+            canvas.onclick = () => bird.v = -4.5;
+            loop();
+        }
 
-                // Remove off-screen pipes
-                if (pipe.x + 50 < 0) {
-                    pipes.splice(index, 1);
-                }
+        // --- BLACKJACK LOGIC ---
+        let deck, playerHand, dealerHand, bjGameOver;
+
+        function initBlackjack() {
+            deck = [];
+            const suits = ['♠','♥','♦','♣'];
+            const values = ['2','3','4','5','6','7','8','9','10','J','Q','K','A'];
+            for(let s of suits) for(let v of values) deck.push({s, v});
+            deck.sort(() => Math.random() - 0.5);
+
+            playerHand = [deck.pop(), deck.pop()];
+            dealerHand = [deck.pop(), deck.pop()];
+            bjGameOver = false;
+
+            document.getElementById('bj-reset').style.display = 'none';
+            document.getElementById('bj-controls').style.display = 'block';
+            document.getElementById('bj-msg').innerText = "Blackjack";
+            updateBJUI();
+        }
+
+        function getVal(hand) {
+            let total = 0, aces = 0;
+            hand.forEach(c => {
+                if(['J','Q','K'].includes(c.v)) total += 10;
+                else if(c.v === 'A') { total += 11; aces++; }
+                else total += parseInt(c.v);
+            });
+            while(total > 21 && aces > 0) { total -= 10; aces--; }
+            return total;
+        }
+
+        function updateBJUI(showDealer = false) {
+            const dArea = document.getElementById('dealer-cards');
+            const pArea = document.getElementById('player-cards');
+            dArea.innerHTML = ''; pArea.innerHTML = '';
+
+            dealerHand.forEach((c, i) => {
+                let div = document.createElement('div'); div.className = 'card';
+                div.innerText = (i === 0 && !showDealer) ? '?' : c.v + c.s;
+                dArea.appendChild(div);
+            });
+            playerHand.forEach(c => {
+                let div = document.createElement('div'); div.className = 'card';
+                div.innerText = c.v + c.s;
+                pArea.appendChild(div);
             });
 
-            frameCount++;
+            document.getElementById('player-score').innerText = getVal(playerHand);
+            document.getElementById('dealer-score').innerText = showDealer ? getVal(dealerHand) : '?';
         }
 
-        function draw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            // Draw background features (clouds/bushes simplified)
-            ctx.fillStyle = '#81d4fa';
-            ctx.fillRect(0, 500, canvas.width, 100);
-
-            drawPipes();
-            drawBird();
+        function bjHit() {
+            playerHand.push(deck.pop());
+            updateBJUI();
+            if(getVal(playerHand) > 21) bjEnd("BUST! U SUCK DUMBASS");
         }
 
-        function gameLoop() {
-            update();
-            draw();
-            animationId = requestAnimationFrame(gameLoop);
+        function bjStand() {
+            while(getVal(dealerHand) < 17) dealerHand.push(deck.pop());
+            updateBJUI(true);
+            let p = getVal(playerHand), d = getVal(dealerHand);
+            if(d > 21 || p > d) bjEnd("YOU WIN... THIS TIME");
+            else if(p === d) bjEnd("PUSH");
+            else bjEnd("DEALER WINS. U SUCK DUMBASS");
         }
 
-        function gameOver() {
-            isGameOver = true;
-            cancelAnimationFrame(animationId);
-            messageBox.style.display = 'block';
+        function bjEnd(msg) {
+            document.getElementById('bj-msg').innerText = msg;
+            document.getElementById('bj-controls').style.display = 'none';
+            document.getElementById('bj-reset').style.display = 'inline-block';
         }
 
-        function resetGame() {
-            bird = { x: 50, y: 300, velocity: 0, radius: 15 };
-            pipes = [];
-            score = 0;
-            frameCount = 0;
-            isGameOver = false;
-            scoreDisplay.innerText = '0';
-            messageBox.style.display = 'none';
-            gameLoop();
-        }
+        // --- CROSSY ROAD LOGIC ---
+        function initCrossy() {
+            const canvas = document.getElementById('crossyCanvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 400; canvas.height = 600;
 
-        // Inputs
-        function handleAction() {
-            if (!isGameOver) {
-                bird.velocity = JUMP;
+            let player = { x: 185, y: 550, size: 30 };
+            let score = 0;
+            let lanes = [];
+            for(let i=0; i<10; i++) {
+                lanes.push({
+                    y: i * 50 + 50,
+                    speed: (Math.random() * 2 + 1) * (Math.random() > 0.5 ? 1 : -1),
+                    cars: [{x: Math.random() * 400}, {x: Math.random() * 400 + 200}]
+                });
             }
+
+            function loop() {
+                ctx.fillStyle = '#333'; ctx.fillRect(0,0,400,600);
+                
+                // Draw lanes
+                lanes.forEach(l => {
+                    ctx.fillStyle = '#444'; ctx.fillRect(0, l.y, 400, 48);
+                    ctx.fillStyle = 'red';
+                    l.cars.forEach(c => {
+                        c.x += l.speed;
+                        if(c.x > 400) c.x = -50;
+                        if(c.x < -50) c.x = 400;
+                        ctx.fillRect(c.x, l.y + 5, 50, 38);
+                        
+                        // Collision
+                        if(player.x < c.x + 50 && player.x + 30 > c.x && player.y < l.y + 43 && player.y + 30 > l.y + 5) {
+                            showScreen('suck');
+                        }
+                    });
+                });
+
+                ctx.fillStyle = 'white';
+                ctx.fillRect(player.x, player.y, player.size, player.size);
+
+                currentLoop = requestAnimationFrame(loop);
+            }
+
+            window.onkeydown = (e) => {
+                if(e.key === 'ArrowUp') { player.y -= 50; score++; document.getElementById('crossy-score').innerText = score; }
+                if(e.key === 'ArrowDown') player.y += 50;
+                if(e.key === 'ArrowLeft') player.x -= 30;
+                if(e.key === 'ArrowRight') player.x += 30;
+                if(player.y < 0) { player.y = 550; } // Reset loop
+            };
+            canvas.onclick = () => { player.y -= 50; score++; document.getElementById('crossy-score').innerText = score; if(player.y < 0) player.y = 550; };
+
+            loop();
         }
 
-        window.addEventListener('keydown', (e) => {
-            if (e.code === 'Space' || e.code === 'ArrowUp') {
-                handleAction();
-            }
-        });
-
-        canvas.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            handleAction();
-        });
-
-        canvas.addEventListener('mousedown', handleAction);
-
-        // Start
-        window.onload = () => {
-            gameLoop();
-        };
     </script>
 </body>
 </html>
